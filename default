@@ -1,0 +1,64 @@
+
+
+
+
+
+server {
+  listen 80;
+  server_name panel.dealence.com;
+
+  # Backend
+
+  location /ea {
+    proxy_pass http://localhost:4001/ea/;
+  }
+
+  location /ea/ {
+    proxy_pass http://localhost:4001/ea/;
+  }
+
+  location / {
+  proxy_pass http://localhost:4001/;
+  }
+
+  
+}
+
+server {
+       listen 80;
+       server_name app.dealence.com ;
+       return 301 https://app.dealence.com$request_uri;
+}
+server {
+  listen 443 ssl http2;
+  server_name app.dealence.com;
+ # Certificate
+       ssl_certificate /etc/nginx/ssl/bundle.crt;
+
+       # Private Key
+       ssl_certificate_key /etc/nginx/ssl/private.key;
+
+  # Backend
+  location /api {
+    proxy_pass http://localhost:4000/api;
+ proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header content-type "application/json";
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+  }
+  location /api/ {
+    proxy_pass http://localhost:4000/api/;
+ proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header content-type "application/json";
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+  }
+ location / {
+    proxy_pass http://localhost:4000/;
+
+  }
+}
