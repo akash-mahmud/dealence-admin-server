@@ -32,4 +32,4 @@ jobs:
           touch .env
           echo "${{ secrets.ENV_FILE }}" > .env
           sudo pnpm install --only=prod
-          pm2 restart dealence-admin-server
+          sudo pm2 restart dealence-admin-server
