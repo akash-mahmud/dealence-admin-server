@@ -23,7 +23,11 @@ module.exports = (sequelize, Sequelize) => {
         startDate: {
             type: Sequelize.DATE,
             allowNull: false
-        }
+        },
+              contract: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
     });
 
     return Increment;

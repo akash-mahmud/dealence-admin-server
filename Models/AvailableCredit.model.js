@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Account = sequelize.define("account", {
+  const AvailableCredit = sequelize.define("availableCredit", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
@@ -7,12 +7,17 @@ module.exports = (sequelize, Sequelize) => {
       primaryKey: true,
     },
 
-
-    availableCredit: {
+    credit: {
       type: Sequelize.REAL,
-      defaultValue: 0.0,
+      allowNull: false,
+    },
+
+
+    contract: {
+      type: Sequelize.STRING,
       allowNull: false,
     },
   });
-  return Account;
+
+  return AvailableCredit;
 };

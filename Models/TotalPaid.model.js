@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Account = sequelize.define("account", {
+  const TotalPaid = sequelize.define("totalPaid", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
@@ -7,12 +7,19 @@ module.exports = (sequelize, Sequelize) => {
       primaryKey: true,
     },
 
-
-    availableCredit: {
+    totalPaid: {
       type: Sequelize.REAL,
-      defaultValue: 0.0,
+      allowNull: false,
+    },
+    date: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
+    contract: {
+      type: Sequelize.STRING,
       allowNull: false,
     },
   });
-  return Account;
+
+  return TotalPaid;
 };
