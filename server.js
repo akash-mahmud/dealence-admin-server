@@ -757,6 +757,35 @@ app.post("/api/user/editPlan/:id/:incrementId", verify, async (req, res) => {
 });
 
 // edit balance log
+app.post("/api/user/edittotalpaid/:id", verify, async (req, res) => {
+  let { startDate, totalPaid, contract } = req.body;
+  const { id } = req.params;
+  totalPaid = parseFloat(totalPaid);
+
+  try {
+    const validBody = totalPaidSchema.validate(req.body);
+
+    if (validBody.error == null) {
+      // Update balancelog object
+      const totalpaid = await TotalPaid.findOne({
+        where: {
+          userId: id,
+        },
+      });
+      await totalpaid.update({
+        totalPaid: totalPaid,
+        updatedAt: new Date(startDate),
+        contract: contract,
+      });
+
+      res.send("success");
+    }
+  } catch (err) {
+    res.send(err.message);
+  }
+});
+
+// edit balance log
 app.post("/api/user/editbalancelog/:id", verify, async (req, res) => {
   let { startDate, balance, contract } = req.body;
   const { id } = req.params;
