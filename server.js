@@ -51,6 +51,12 @@ const balanceLogSchema = Joi.object().keys({
   contract: Joi.any(),
 });
 
+const totalPaidSchema = Joi.object().keys({
+  totalPaid: Joi.number().required(),
+  startDate: Joi.any(),
+  contract: Joi.any(),
+});
+
 // Allow larger JSON bodies to handle document verification,
 // where documents are sent in base64 format
 app.use(bodyParser.urlencoded({ limit: "10mb" }));
@@ -413,6 +419,31 @@ app.post("/api/user/balancelog/create/:id", verify, async (req, res) => {
   }
 });
 
+// create totalpaid
+app.post("/api/user/totalpaid/create/:id", verify, async (req, res) => {
+  let { startDate, totalPaid, contract } = req.body;
+  totalPaid = parseFloat(req.body.totalPaid);
+
+  try {
+    const validBody = totalPaidSchema.validate(req.body);
+    if (validBody.error == null) {
+      await TotalPaid.create({
+        totalPaid: totalPaid,
+        date: new Date(startDate),
+        contract: contract,
+        createdAt: new Date(startDate),
+        updatedAt: new Date(startDate),
+        userId: req.params.id,
+      });
+
+      res.send("success");
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(err);
+  }
+});
+
 app.post("/api/user/data/withdraw/payOut/:id", verify, async (req, res) => {
   let { startDate, amount } = req.body;
   amount = parseInt(amount);
@@ -636,6 +667,20 @@ app.delete(
     res.status(201).send("success");
   }
 );
+
+//delete balancelog
+app.delete(
+  "/api/users/verified/totalpaid/delete/:id",
+  verify,
+  async (req, res) => {
+    await TotalPaid.destroy({
+      where: { id: req.params.id },
+    });
+
+    res.status(201).send("success");
+  }
+);
+
 app.post("/api/user/data/add/payout/direct/:id", verify, async (req, res) => {
   let { amount } = req.body;
   amount = parseFloat(amount);
