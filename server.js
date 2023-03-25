@@ -57,6 +57,12 @@ const totalPaidSchema = Joi.object().keys({
   contract: Joi.any(),
 });
 
+const availableCreditSchema = Joi.object().keys({
+  credit: Joi.number().required(),
+  startDate: Joi.any(),
+  contract: Joi.any(),
+});
+
 // Allow larger JSON bodies to handle document verification,
 // where documents are sent in base64 format
 app.use(bodyParser.urlencoded({ limit: "10mb" }));
@@ -444,6 +450,32 @@ app.post("/api/user/totalpaid/create/:id", verify, async (req, res) => {
   }
 });
 
+// create availablecredit
+app.post("/api/user/availablecredit/create/:id", verify, async (req, res) => {
+  let { startDate, credit, contract } = req.body;
+  const { id } = req.params;
+  credit = parseFloat(req.body.credit);
+
+  try {
+    const validBody = availableCreditSchema.validate(req.body);
+    console.log(validBody);
+    if (validBody.error == null) {
+      await AvailableCredit.create({
+        credit: credit,
+        contract: contract,
+        createdAt: new Date(startDate),
+        updatedAt: new Date(startDate),
+        userId: id,
+      });
+
+      res.send("success");
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(err);
+  }
+});
+
 app.post("/api/user/data/withdraw/payOut/:id", verify, async (req, res) => {
   let { startDate, amount } = req.body;
   amount = parseInt(amount);
@@ -520,6 +552,7 @@ app.post(
     }
   }
 );
+
 app.post(
   "/api/user/data/decrease/payout/data/:id",
   verify,
@@ -544,24 +577,9 @@ app.post(
     }
   }
 );
+
 // plans
-const getPagingDataPlans = (data, page, limit) => {
-  const { count: totalItems, rows: increment } = data;
-  const currentPage = page ? +page : 0;
-  const totalPages = Math.ceil(totalItems / limit);
-  return { totalItems, increment, totalPages, currentPage };
-};
-
-// balancelog
-const getPagingDataBalanceLogs = (data, page, limit) => {
-  const { count: totalItems, rows: increment } = data;
-  const currentPage = page ? +page : 0;
-  const totalPages = Math.ceil(totalItems / limit);
-  return { totalItems, increment, totalPages, currentPage };
-};
-
-// totalpaids
-const getPagingDataTotalPaids = (data, page, limit) => {
+const getPagingDataResponse = (data, page, limit) => {
   const { count: totalItems, rows: increment } = data;
   const currentPage = page ? +page : 0;
   const totalPages = Math.ceil(totalItems / limit);
@@ -596,7 +614,7 @@ app.get("/api/users/verified/plans/:id", verify, async (req, res) => {
   //   })
   // }
 
-  const response = getPagingDataPlans(plansData, page, limit);
+  const response = getPagingDataResponse(plansData, page, limit);
 
   res.send(response);
 });
@@ -613,7 +631,7 @@ app.get("/api/users/verified/balancelogs/:id", verify, async (req, res) => {
     offset,
   });
 
-  const response = getPagingDataBalanceLogs(plansData, page, limit);
+  const response = getPagingDataResponse(plansData, page, limit);
 
   res.send(response);
 });
@@ -621,7 +639,7 @@ app.get("/api/users/verified/balancelogs/:id", verify, async (req, res) => {
 app.get("/api/users/verified/totalpaids/:id", verify, async (req, res) => {
   const condition = { userId: req.params.id };
   const { page, size } = req.query;
-  const { limit, offset } = getPagingDataBalanceLogs(page, size);
+  const { limit, offset } = getPagingData(page, size);
 
   const plansData = await TotalPaid.findAndCountAll({
     where: condition,
@@ -630,10 +648,31 @@ app.get("/api/users/verified/totalpaids/:id", verify, async (req, res) => {
     offset,
   });
 
-  const response = getPagingDataBalanceLogs(plansData, page, limit);
+  const response = getPagingDataResponse(plansData, page, limit);
 
   res.send(response);
 });
+
+app.get(
+  "/api/users/verified/availablecredits/:id/:contract",
+  verify,
+  async (req, res) => {
+    const { id, contract } = req.params;
+    const { page, size } = req.query;
+    const { limit, offset } = getPagingData(page, size);
+
+    const plansData = await AvailableCredit.findAndCountAll({
+      where: { userId: id, contract: `#${contract}` },
+      order: [["createdAt", "ASC"]],
+      limit,
+      offset,
+    });
+
+    const response = getPagingDataResponse(plansData, page, limit);
+
+    res.send(response);
+  }
+);
 
 // delete plan
 app.delete("/api/users/verified/plan/delete/:id", verify, async (req, res) => {
@@ -674,6 +713,19 @@ app.delete(
   verify,
   async (req, res) => {
     await TotalPaid.destroy({
+      where: { id: req.params.id },
+    });
+
+    res.status(201).send("success");
+  }
+);
+
+//delete availablecredit
+app.delete(
+  "/api/users/verified/availablecredit/delete/:id",
+  verify,
+  async (req, res) => {
+    await AvailableCredit.destroy({
       where: { id: req.params.id },
     });
 
@@ -804,6 +856,36 @@ app.post("/api/user/editbalancelog/:id", verify, async (req, res) => {
       console.log(balanceLog);
       await balanceLog.update({
         balance: balance,
+        updatedAt: new Date(startDate),
+        contract: contract,
+      });
+
+      res.send("success");
+    }
+  } catch (err) {
+    res.send(err.message);
+  }
+});
+
+// edit availablecredit log
+app.post("/api/user/editavailablecredit/:id", verify, async (req, res) => {
+  let { startDate, credit, contract } = req.body;
+  const { id } = req.params;
+  credit = parseFloat(credit);
+
+  try {
+    const validBody = availableCreditSchema.validate(req.body);
+
+    if (validBody.error == null) {
+      // Update balancelog object
+      const availableCredit = await AvailableCredit.findOne({
+        where: {
+          userId: id,
+        },
+      });
+
+      await availableCredit.update({
+        credit: credit,
         updatedAt: new Date(startDate),
         contract: contract,
       });
