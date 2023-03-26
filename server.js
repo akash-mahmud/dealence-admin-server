@@ -647,6 +647,34 @@ app.get(
   }
 );
 
+app.get(
+  "/api/users/verified/totalpaid/:totalpaidId",
+  verify,
+  async (req, res) => {
+    const totalpaidData = await TotalPaid.findOne({
+      where: {
+        id: req.params.totalpaidId,
+      },
+    });
+
+    res.send(totalpaidData);
+  }
+);
+
+app.get(
+  "/api/users/verified/availablecredit/:creditId",
+  verify,
+  async (req, res) => {
+    const availablecreditData = await AvailableCredit.findOne({
+      where: {
+        id: req.params.creditId,
+      },
+    });
+
+    res.send(availablecreditData);
+  }
+);
+
 app.get("/api/users/verified/balancelogs/:id", verify, async (req, res) => {
   const condition = { userId: req.params.id };
   const { page, size } = req.query;
@@ -837,9 +865,9 @@ app.post("/api/user/editPlan/:id/:incrementId", verify, async (req, res) => {
 });
 
 // edit balance log
-app.post("/api/user/edittotalpaid/:id", verify, async (req, res) => {
-  let { startDate, totalPaid, contract } = req.body;
-  const { id } = req.params;
+app.post("/api/user/edittotalpaid/:totalpaidId", verify, async (req, res) => {
+  let { startDate, totalPaid } = req.body;
+  const { totalpaidId } = req.params;
   totalPaid = parseFloat(totalPaid);
 
   try {
@@ -849,13 +877,12 @@ app.post("/api/user/edittotalpaid/:id", verify, async (req, res) => {
       // Update balancelog object
       const totalpaid = await TotalPaid.findOne({
         where: {
-          userId: id,
+          id: totalpaidId,
         },
       });
       await totalpaid.update({
         totalPaid: totalPaid,
         updatedAt: new Date(startDate),
-        contract: contract,
       });
 
       res.send("success");
@@ -866,9 +893,9 @@ app.post("/api/user/edittotalpaid/:id", verify, async (req, res) => {
 });
 
 // edit balance log
-app.post("/api/user/editbalancelog/:id", verify, async (req, res) => {
-  let { startDate, balance, contract } = req.body;
-  const { id } = req.params;
+app.post("/api/user/editbalancelog/:balanceId", verify, async (req, res) => {
+  let { startDate, balance } = req.body;
+  const { balanceId } = req.params;
   balance = parseInt(balance);
 
   try {
@@ -878,14 +905,13 @@ app.post("/api/user/editbalancelog/:id", verify, async (req, res) => {
       // Update balancelog object
       const balanceLog = await BalanceUpdateLog.findOne({
         where: {
-          userId: id,
+          id: balanceId,
         },
       });
-      console.log(balanceLog);
+
       await balanceLog.update({
         balance: balance,
         updatedAt: new Date(startDate),
-        contract: contract,
       });
 
       res.send("success");
