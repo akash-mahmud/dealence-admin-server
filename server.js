@@ -619,6 +619,16 @@ app.get("/api/users/verified/plans/:id", verify, async (req, res) => {
   res.send(response);
 });
 
+app.get("/api/users/verified/plan/:id/:contract", verify, async (req, res) => {
+  const condition = { userId: req.params.id, contract: req.params.contract };
+
+  const planData = await Increment.findOne({
+    where: condition,
+  });
+
+  res.send(planData);
+});
+
 app.get("/api/users/verified/balancelogs/:id", verify, async (req, res) => {
   const condition = { userId: req.params.id };
   const { page, size } = req.query;
