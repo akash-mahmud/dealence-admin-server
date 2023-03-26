@@ -622,7 +622,7 @@ app.get("/api/users/verified/plans/:id", verify, async (req, res) => {
 app.get("/api/users/verified/balancelogs/:id", verify, async (req, res) => {
   const condition = { userId: req.params.id };
   const { page, size } = req.query;
-  const { limit, offset } = getPagingDataBalanceLogs(page, size);
+  const { limit, offset } = getPagination(page, size);
 
   const plansData = await BalanceUpdateLog.findAndCountAll({
     where: condition,
