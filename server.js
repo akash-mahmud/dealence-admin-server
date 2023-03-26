@@ -619,15 +619,33 @@ app.get("/api/users/verified/plans/:id", verify, async (req, res) => {
   res.send(response);
 });
 
-app.get("/api/users/verified/plan/:id/:contract", verify, async (req, res) => {
-  const condition = { userId: req.params.id, contract: req.params.contract };
+app.get(
+  "/api/users/verified/plan/:id/:increamentId",
+  verify,
+  async (req, res) => {
+    const condition = { userId: req.params.id, id: req.params.increamentId };
 
-  const planData = await Increment.findOne({
-    where: condition,
-  });
+    const planData = await Increment.findOne({
+      where: condition,
+    });
 
-  res.send(planData);
-});
+    res.send(planData);
+  }
+);
+
+app.get(
+  "/api/users/verified/planbalance/:balanceId",
+  verify,
+  async (req, res) => {
+    const planBalanceData = await BalanceUpdateLog.findOne({
+      where: {
+        id: req.params.balanceId,
+      },
+    });
+
+    res.send(planBalanceData);
+  }
+);
 
 app.get("/api/users/verified/balancelogs/:id", verify, async (req, res) => {
   const condition = { userId: req.params.id };
