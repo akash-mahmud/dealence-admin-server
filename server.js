@@ -648,6 +648,34 @@ app.get(
   }
 );
 
+app.get(
+  "/api/users/verified/totalpaid/:totalpaidId",
+  verify,
+  async (req, res) => {
+    const totalpaidData = await TotalPaid.findOne({
+      where: {
+        id: req.params.totalpaidId,
+      },
+    });
+
+    res.send(totalpaidData);
+  }
+);
+
+app.get(
+  "/api/users/verified/availablecredit/:creditId",
+  verify,
+  async (req, res) => {
+    const availablecreditData = await AvailableCredit.findOne({
+      where: {
+        id: req.params.creditId,
+      },
+    });
+
+    res.send(availablecreditData);
+  }
+);
+
 app.get("/api/users/verified/balancelogs/:id", verify, async (req, res) => {
   const condition = { userId: req.params.id };
   const { page, size } = req.query;
@@ -683,7 +711,7 @@ app.get("/api/users/verified/totalpaids/:id", verify, async (req, res) => {
 });
 
 app.get(
-  "/api/users/verified/availablecredits/:id/:contract",
+  "/api/users/verified/availablecredits/:id",
   verify,
   async (req, res) => {
     const { id, contract } = req.params;
@@ -691,7 +719,7 @@ app.get(
     const { limit, offset } = getPagingData(page, size);
 
     const plansData = await AvailableCredit.findAndCountAll({
-      where: { userId: id, contract: `#${contract}` },
+      where: { userId: id },
       order: [["createdAt", "ASC"]],
       limit,
       offset,
@@ -826,7 +854,7 @@ app.post("/api/user/editPlan/:id/:incrementId", verify, async (req, res) => {
         plan: plan,
         principal: amount,
         startDate: new Date(startDate),
-        updatedAt: new Date(startDate),
+
         contract: contract,
       });
 
@@ -838,9 +866,9 @@ app.post("/api/user/editPlan/:id/:incrementId", verify, async (req, res) => {
 });
 
 // edit balance log
-app.post("/api/user/edittotalpaid/:id", verify, async (req, res) => {
-  let { startDate, totalPaid, contract } = req.body;
-  const { id } = req.params;
+app.post("/api/user/edittotalpaid/:totalpaidId", verify, async (req, res) => {
+  let { startDate, totalPaid } = req.body;
+  const { totalpaidId } = req.params;
   totalPaid = parseFloat(totalPaid);
 
   try {
@@ -850,13 +878,13 @@ app.post("/api/user/edittotalpaid/:id", verify, async (req, res) => {
       // Update balancelog object
       const totalpaid = await TotalPaid.findOne({
         where: {
-          userId: id,
+          id: totalpaidId,
         },
       });
       await totalpaid.update({
         totalPaid: totalPaid,
-        updatedAt: new Date(startDate),
-        contract: contract,
+         date: new Date(startDate),
+   
       });
 
       res.send("success");
@@ -867,9 +895,9 @@ app.post("/api/user/edittotalpaid/:id", verify, async (req, res) => {
 });
 
 // edit balance log
-app.post("/api/user/editbalancelog/:id/:userId", verify, async (req, res) => {
-  let { startDate, balance, contract } = req.body;
-  const { id } = req.params;
+app.post("/api/user/editbalancelog/:balanceId", verify, async (req, res) => {
+  let { startDate, balance } = req.body;
+  const { balanceId } = req.params;
   balance = parseInt(balance);
 
   try {
@@ -880,7 +908,7 @@ app.post("/api/user/editbalancelog/:id/:userId", verify, async (req, res) => {
       await BalanceUpdateLog.update(
         {
           balance: balance,
-          updatedAt: new Date(startDate),
+          date: new Date(startDate),
           contract: contract,
         },
         {
@@ -918,7 +946,7 @@ app.post("/api/user/editavailablecredit/:id", verify, async (req, res) => {
 
       await availableCredit.update({
         credit: credit,
-        updatedAt: new Date(startDate),
+
         contract: contract,
       });
 
@@ -956,8 +984,8 @@ app.post("/api/user/updatePlan/:id", verify, async (req, res) => {
       plan: req.body.plan,
       principal: parseFloat(req.body.amount),
       startDate: new Date(startDate),
-      createdAt: new Date(startDate),
-      updatedAt: new Date(startDate),
+
+
       userId: req.params.id,
       investmentId: investment.id,
     });
@@ -990,8 +1018,7 @@ app.post("/api/user/updatePlan/:id", verify, async (req, res) => {
         plan: req.body.plan,
         principal: parseFloat(req.body.amount),
         startDate: new Date(startDate),
-        createdAt: new Date(startDate),
-        updatedAt: new Date(startDate),
+
         userId: req.params.id,
         investmentId: investment.id,
         contract: req.body.contract,
