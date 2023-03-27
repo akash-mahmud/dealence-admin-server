@@ -710,7 +710,7 @@ app.get("/api/users/verified/totalpaids/:id", verify, async (req, res) => {
 });
 
 app.get(
-  "/api/users/verified/availablecredits/:id/:contract",
+  "/api/users/verified/availablecredits/:id",
   verify,
   async (req, res) => {
     const { id, contract } = req.params;
@@ -718,7 +718,7 @@ app.get(
     const { limit, offset } = getPagingData(page, size);
 
     const plansData = await AvailableCredit.findAndCountAll({
-      where: { userId: id, contract: `#${contract}` },
+      where: { userId: id },
       order: [["createdAt", "ASC"]],
       limit,
       offset,
