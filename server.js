@@ -403,6 +403,7 @@ app.post("/api/user/plan/create/:id", verify, async (req, res) => {
 // create balance log
 app.post("/api/user/balancelog/create/:id", verify, async (req, res) => {
   let { startDate, balance, contract } = req.body;
+
   balance = parseInt(balance);
 
   try {
@@ -866,7 +867,7 @@ app.post("/api/user/edittotalpaid/:id", verify, async (req, res) => {
 });
 
 // edit balance log
-app.post("/api/user/editbalancelog/:id", verify, async (req, res) => {
+app.post("/api/user/editbalancelog/:id/:userId", verify, async (req, res) => {
   let { startDate, balance, contract } = req.body;
   const { id } = req.params;
   balance = parseInt(balance);
@@ -876,21 +877,24 @@ app.post("/api/user/editbalancelog/:id", verify, async (req, res) => {
 
     if (validBody.error == null) {
       // Update balancelog object
-      const balanceLog = await BalanceUpdateLog.findOne({
-        where: {
-          userId: id,
+      await BalanceUpdateLog.update(
+        {
+          balance: balance,
+          updatedAt: new Date(startDate),
+          contract: contract,
         },
-      });
-      console.log(balanceLog);
-      await balanceLog.update({
-        balance: balance,
-        updatedAt: new Date(startDate),
-        contract: contract,
-      });
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
+
 
       res.send("success");
     }
   } catch (err) {
+    console.log(err);
     res.send(err.message);
   }
 });

@@ -3,7 +3,7 @@ const Sequelize = require("sequelize");
 // const sequelize = new Sequelize('sqlite::memory:', { logging: false });
 
 const sequelize = new Sequelize(
-  "postgres://postgres:cse15451@localhost:5432/dealence",
+  "postgres://postgres:1234@localhost:5432/delance",
   { logging: false }
 );
 
@@ -83,3 +83,6 @@ module.exports = {
   BalanceUpdateLog,
   TotalPaid,
 };
+
+
+// I want to pass year as a filter on my sequalize. Then it should return the data in monthwise. For example January:{this month data}
