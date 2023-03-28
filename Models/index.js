@@ -84,5 +84,4 @@ module.exports = {
   TotalPaid,
 };
 
-
 // I want to pass year as a filter on my sequalize. Then it should return the data in monthwise. For example January:{this month data}

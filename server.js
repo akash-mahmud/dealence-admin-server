@@ -883,8 +883,7 @@ app.post("/api/user/edittotalpaid/:totalpaidId", verify, async (req, res) => {
       });
       await totalpaid.update({
         totalPaid: totalPaid,
-         date: new Date(startDate),
-   
+        date: new Date(startDate),
       });
 
       res.send("success");
@@ -909,15 +908,13 @@ app.post("/api/user/editbalancelog/:balanceId", verify, async (req, res) => {
         {
           balance: balance,
           date: new Date(startDate),
-          contract: contract,
         },
         {
           where: {
-            id: id,
+            id: balanceId,
           },
         }
       );
-
 
       res.send("success");
     }
@@ -928,34 +925,37 @@ app.post("/api/user/editbalancelog/:balanceId", verify, async (req, res) => {
 });
 
 // edit availablecredit log
-app.post("/api/user/editavailablecredit/:id", verify, async (req, res) => {
-  let { startDate, credit, contract } = req.body;
-  const { id } = req.params;
-  credit = parseFloat(credit);
+app.post(
+  "/api/user/editavailablecredit/:creditId",
+  verify,
+  async (req, res) => {
+    let { startDate, credit } = req.body;
+    const { creditId } = req.params;
+    credit = parseFloat(credit);
 
-  try {
-    const validBody = availableCreditSchema.validate(req.body);
+    try {
+      const validBody = availableCreditSchema.validate(req.body);
 
-    if (validBody.error == null) {
-      // Update balancelog object
-      const availableCredit = await AvailableCredit.findOne({
-        where: {
-          userId: id,
-        },
-      });
+      if (validBody.error == null) {
+        // Update available credit object
+        await AvailableCredit.update(
+          {
+            credit: credit,
+          },
+          {
+            where: {
+              id: creditId,
+            },
+          }
+        );
 
-      await availableCredit.update({
-        credit: credit,
-
-        contract: contract,
-      });
-
-      res.send("success");
+        res.send("success");
+      }
+    } catch (err) {
+      res.send(err.message);
     }
-  } catch (err) {
-    res.send(err.message);
   }
-});
+);
 
 app.post("/api/user/updatePlan/:id", verify, async (req, res) => {
   let { startDate, amount } = req.body;
@@ -984,7 +984,6 @@ app.post("/api/user/updatePlan/:id", verify, async (req, res) => {
       plan: req.body.plan,
       principal: parseFloat(req.body.amount),
       startDate: new Date(startDate),
-
 
       userId: req.params.id,
       investmentId: investment.id,
