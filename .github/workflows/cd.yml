@@ -31,5 +31,5 @@ jobs:
           sudo git status
           sudo touch .env
           sudo echo "${{ secrets.ENV_FILE }}" > .env
-          sudo pnpm install --only=prod
+          sudo pnpm install
           sudo pm2 restart dealence-admin-server
