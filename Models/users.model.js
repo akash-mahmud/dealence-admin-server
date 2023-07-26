@@ -37,6 +37,10 @@ module.exports = (sequelize, Sequelize) => {
     country: {
       type: Sequelize.STRING,
     },
+    status: {
+      type: Sequelize.STRING,
+      defaultValue:'active'
+    },
     password: {
       type: Sequelize.STRING,
     },

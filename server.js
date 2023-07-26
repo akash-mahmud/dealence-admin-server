@@ -10,6 +10,7 @@ const {
   AvailableCredit,
   BalanceUpdateLog,
   TotalPaid,
+
 } = require("./Models");
 const jwt = require("jsonwebtoken");
 const transactionsType = require("./constants/transactionsType");
@@ -22,6 +23,14 @@ const { User, Account } = require("./Models");
 const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const updateData = async () => await User.update({ status: "active" },
+  {
+    where: {
+      status: null,
+    },
+  }
+)
+updateData()
 // const myPlaintextPassword = '@#1Matteo254';
 
 // bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {
@@ -34,6 +43,7 @@ dotenv.config();
 // const { User, Account, Increment, Payout, Investment } = require('./models');
 
 const path = require("path");
+const usersModel = require("./Models/users.model");
 
 const app = express();
 app.use(morgan("dev"));
@@ -97,7 +107,15 @@ const verify = async (req, res, next) => {
     return res.status(404).send("You are not authenticated");
   }
 };
-
+app.post("/api/users/delete", verify, async (req, res) => {
+  const { id } = req.body
+  await User.destroy({
+    where: {
+      id
+    },
+  })
+  res.send('success');
+});
 app.get("/api/users", verify, async (req, res) => {
   const users = await User.findAll({
     where: { isActive: false, isDocumentUploaded: true },
@@ -231,6 +249,7 @@ app.post("/api/user/update/details/:id", verify, async (req, res) => {
     zip,
     country,
     contracts,
+    status
   } = req.body;
 
   if (user) {
@@ -246,6 +265,7 @@ app.post("/api/user/update/details/:id", verify, async (req, res) => {
         zip: zip,
         country: country,
         contracts,
+        status
       },
       { where: { id: req.params.id } }
     );
